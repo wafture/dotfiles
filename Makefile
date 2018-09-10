@@ -16,7 +16,7 @@ ifneq (,$(findstring Darwin, $(UNAME)))
 	FLAVOR := darwin
 endif
 
-default: clean bootstrap-$(FLAVOR) zsh git vim go
+default: clean bootstrap-$(FLAVOR) zsh git vim vimfiles go
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-12s %s\n\033[0m", $$1, $$2}'
@@ -119,6 +119,40 @@ bootstrap-debian:
 	@apt clean
 
 #
+# make: bootstrap-centos target
+#
+bootstrap-centos:
+	@echo $(FORMAT) "upgrading system"
+	@yum clean all
+	@yum install -y -q epel-release
+	@yum update -y -q
+
+	@echo $(FORMAT) "installing $(FLAVOR) packages"
+	@yum install -y -q \
+		autoconf \
+		ca-certificates \
+		curl \
+		curl-devel \
+		expat-devel \
+		gcc \
+		gcc-c++ \
+		gettext \
+		grep \
+		gzip \
+		jq \
+		less \
+		make \
+		net-tools \
+		ncurses-devel \
+		openssl-devel \
+		perl-ExtUtils-MakeMaker \
+		rpm-build \
+		tree \
+		wget \
+		zlib-devel \
+		zsh
+
+#
 # make: zsh target
 #
 zsh:
@@ -152,6 +186,21 @@ git:
 		&& sudo make prefix=/usr/local install
 
 #
+# make: hub target
+#
+HUB_VERSION := 2.5.1
+HUB_HOME    := /usr/local/src
+HUB_FLAVOR  := $(shell uname -s | awk '{print tolower($$0)}')
+HUB_SOURCE  := https://github.com/github/hub/releases/download/v$(HUB_VERSION)/hub-$(HUB_FLAVOR)-amd64-$(HUB_VERSION).tgz
+
+hub:
+	@echo $(FORMAT) "installing $@"
+	@sudo rm -rf $(HUB_HOME)/$@-*-$(HUB_VERSION)
+	@curl -sSL $(HUB_SOURCE) | sudo tar -C $(HUB_HOME) -zx
+	@cd $(HUB_HOME)/$@-*-$(HUB_VERSION) \
+		&& sudo ./install
+
+#
 # make: vim target
 #
 VIM_VERSION := 8.1.0354
@@ -173,6 +222,8 @@ vimfiles: ## fetch/update vimfiles
 	@echo $(FORMAT) "fetching vimfiles"
 	@rm -rf ~/src/iamnande/vimfiles
 	@git clone git@github.com:iamnande/vimfiles.git ~/src/iamnande/vimfiles
+	@cd ~/src/iamnande/vimfiles \
+		&& make
 
 #
 # make: go target

@@ -1,4 +1,4 @@
-.PHONY: default help clean install bootstrap zsh git vim go
+.PHONY: default help clean install bootstrap-darwin bootstrap-debian zsh git vim vimfiles go
 
 #
 # make: app info
@@ -43,7 +43,31 @@ install: ## installs dotfiles & scripts on system
 	done
 
 #
-# make: bootstrap target
+# make: bootstrap-darwin target
+#
+bootstrap-darwin:
+	@echo $(FORMAT) "installing brew"
+	@/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+	@echo $(FORMAT) "installing brew formulae"
+	@brew install \
+		autoconf \
+		gcc \
+		gettext \
+		hub \
+		kops \
+		make \
+		node \
+		openssl \
+		ossp-uuid \
+		tree \
+		wget \
+		zlib \
+		zsh
+	@brew install kubernetes-cli || brew upgrade kubernetes-cli || true;
+
+#
+# make: bootstrap-debian target
 #
 bootstrap-debian:
 	@echo $(FORMAT) "updating system packages"
@@ -120,12 +144,12 @@ GIT_HOME    := /usr/local/src
 GIT_SOURCE  := https://github.com/git/git/archive/v$(GIT_VERSION).tar.gz
 
 git:
-	@echo $(FORMAT) "installing git"
-	@rm -rf $(GIT_HOME)/git-*
-	@curl -sSL $(GIT_SOURCE) | tar -C $(GIT_HOME) -zx
-	@cd $(GIT_HOME)/git-$(GIT_VERSION) \
-		&& make prefix=/usr/local all \
-		&& make prefix=/usr/local install
+	@echo $(FORMAT) "installing $@"
+	@sudo rm -rf $(GIT_HOME)/$@-*
+	@curl -sSL $(GIT_SOURCE) | sudo tar -C $(GIT_HOME) -zx
+	@cd $(GIT_HOME)/$@-$(GIT_VERSION) \
+		&& sudo make prefix=/usr/local all \
+		&& sudo make prefix=/usr/local install
 
 #
 # make: vim target
@@ -135,12 +159,20 @@ VIM_HOME    := /usr/local/src
 VIM_SOURCE  := https://github.com/vim/vim/archive/v$(VIM_VERSION).tar.gz
 
 vim:
-	@echo $(FORMAT) "installing vim v$(VIM_VERSION)"
-	@rm -rf $(VIM_HOME)/vim-*
-	@curl -sSL $(VIM_SOURCE) | tar -C $(VIM_HOME) -zx
-	@cd $(VIM_HOME)/vim-$(VIM_VERSION) \
-		&& ./configure \
-		&& make install
+	@echo $(FORMAT) "installing $@ v$(VIM_VERSION)"
+	@sudo rm -rf $(VIM_HOME)/$@-*
+	@curl -sSL $(VIM_SOURCE) | sudo tar -C $(VIM_HOME) -zx
+	@cd $(VIM_HOME)/$@-$(VIM_VERSION) \
+		&& sudo ./configure \
+		&& sudo make install
+
+#
+# make: vimfiles target
+#
+vimfiles: ## fetch/update vimfiles
+	@echo $(FORMAT) "fetching vimfiles"
+	@rm -rf ~/src/iamnande/vimfiles
+	@git clone git@github.com:iamnande/vimfiles.git ~/src/iamnande/vimfiles
 
 #
 # make: go target
@@ -151,6 +183,6 @@ GO_FLAVOR  := $(shell uname -s | awk '{print tolower($$0)}')
 GO_SOURCE  := https://dl.google.com/go/go$(GO_VERSION).$(GO_FLAVOR)-amd64.tar.gz
 
 go:
-	@echo $(FORMAT) "installing go $(GO_VERSION)"
-	@rm -rf $(GO_HOME)/go
-	@curl -sSL $(GO_SOURCE) | tar -C $(GO_HOME) -zx
+	@echo $(FORMAT) "installing $@ $(GO_VERSION)"
+	@sudo rm -rf $(GO_HOME)/$@
+	@curl -sSL $(GO_SOURCE) | sudo tar -C $(GO_HOME) -zx

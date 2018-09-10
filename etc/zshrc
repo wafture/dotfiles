@@ -29,6 +29,7 @@ source $ZSH/oh-my-zsh.sh
 alias sudo="sudo "
 alias ll="ls -lphG"
 alias la="ls -laphG"
+eval "$(hub alias -s)"
 alias lsd="ls -lphG | grep '^d'"
 
 #

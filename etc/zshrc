@@ -53,7 +53,7 @@ tre () {
 }
 
 vssh () {
-  cd ~/source/vagrant && vagrant ssh -c 'sudo su -' "$@"
+  cd ~/src/iamnande/vagrant && vagrant ssh -c 'sudo su -' "$@"
 }
 
 gogo(){

@@ -36,8 +36,8 @@ alias lsd="ls -lphG | grep '^d'"
 # zsh: exports
 #
 export LANG="en_US.UTF-8";
-export GOPATH="${HOME}/source/golang"
 export GOROOT=/usr/local/go
+export GOPATH="${HOME}/golang"
 export EDITOR=/usr/local/bin/vim;
 export PATH="${GOPATH}/bin:${GOROOT}/bin:/usr/local/bin:${PATH}"
 

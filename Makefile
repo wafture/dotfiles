@@ -16,7 +16,7 @@ ifneq (,$(findstring Darwin, $(UNAME)))
 	FLAVOR := darwin
 endif
 
-default: clean bootstrap-$(FLAVOR) zsh git vim vimfiles go
+default: clean bootstrap-$(FLAVOR) zsh git vim vimfiles go install
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-12s %s\n\033[0m", $$1, $$2}'

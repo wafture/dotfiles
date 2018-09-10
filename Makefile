@@ -1,129 +1,156 @@
-.PHONY: default help clean install deps
-
-default: help
-help:
-		@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-			awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-12s %s\n\033[0m", $$1, $$2}'
+.PHONY: default help clean install bootstrap zsh git vim go
 
 #
 # make: app info
 #
-APP_NAME    := dotfiles
-APP_VERSION := 0.1.0
-APP_FILES   := $(shell ls $(CURDIR)/etc/*)
-APP_LOG_FMT := `/bin/date "+%Y-%m-%d %H:%M:%S %z [$(APP_NAME)]"`
+NAME    := dotfiles
+FLAVOR  := centos
+UNAME   := $(shell uname -a)
+CONFIGS := $(shell find $(CURDIR)/etc -type f)
+FORMAT  := $(shell /bin/date "+%Y-%m-%d %H:%M:%S %z [$(NAME)]")
+
+ifneq (,$(findstring Ubuntu, $(UNAME)))
+	FLAVOR := debian
+endif
+ifneq (,$(findstring Darwin, $(UNAME)))
+	FLAVOR := darwin
+endif
+
+default: clean bootstrap-$(FLAVOR) zsh git vim go
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-12s %s\n\033[0m", $$1, $$2}'
 
 #
 # make: clean target
 #
-clean: ## clean dotfiles from homedir
-	@echo $(APP_LOG_FMT) "cleaning oh-my-zsh from homedir"
-	@rm -rf ~/.oh-my-zsh
-
-	@echo $(APP_LOG_FMT) "cleaning dotfiles from homedir"
-	@for f in $(APP_FILES); \
-		do \
-			unlink $(HOME)/.`basename $$f` > /dev/null 2>&1; true; \
-		done
+clean: ## clean dotfiles & scripts from system
+	@echo $(FORMAT) "cleaning dotfiles from homedir"
+	@for cfg in $(CONFIGS); \
+	do \
+		unlink $(HOME)/.`basename $$cfg` > /dev/null 2>&1; true; \
+	done
 
 #
 # make: install target
 #
-install: deps ## install dotfiles to homedir
-	@echo $(APP_LOG_FMT) "installing dotfiles"
-	@for f in $(APP_FILES); \
-		do \
-			ln -sfn $$f $(HOME)/.`basename $$f`; \
-		done
+install: ## installs dotfiles & scripts on system
+	@echo $(FORMAT) "installing dotfiles to homedir"
+	@for cfg in $(CONFIGS); \
+	do \
+		f=$$(basename $$cfg); \
+		ln -sfn $$cfg $(HOME)/.`basename $$f`; \
+	done
 
 #
-# make: deps target (install dependencies)
+# make: bootstrap target
 #
-deps: --sudo --pkgs --zsh --git --vim --go
---sudo:
-	@sudo -v
+bootstrap-debian:
+	@echo $(FORMAT) "updating system packages"
+	@apt update -q || true
+	@apt upgrade -q -y || true
+
+	@echo $(FORMAT) "installing $(FLAVOR) packages"
+	@apt install -q -y \
+		adduser \
+		autoconf \
+		automake \
+		build-essential \
+		ca-certificates \
+		coreutils \
+		curl \
+		dnsutils \
+		file \
+		findutils \
+		gcc \
+		g++ \
+		gettext \
+		git \
+		grep \
+		gzip \
+		hostname \
+		jq \
+		less \
+		libcurl4-gnutls-dev \
+		libexpat1-dev \
+		libncurses-dev \
+		libssl-dev \
+		libz-dev \
+		locales \
+		lsof \
+		make \
+		mount \
+		net-tools \
+		ssh \
+		strace \
+		sudo \
+		zip \
+		zlibc \
+		zsh \
+		--no-install-recommends
+
+	@echo $(FORMAT) "cleaning up after apt"
+	@apt autoremove
+	@apt autoclean
+	@apt clean
 
 #
 # make: zsh target
 #
---zsh:
-	@echo $(APP_LOG_FMT) "installing powerline fonts"
+zsh:
+	@echo $(FORMAT) "installing powerline fonts"
 	@git clone --quiet --depth=1 \
-		https://github.com/powerline/fonts.git \
-		~/source/fonts
-	@cd ~/source/fonts && ./install.sh
-	@rm -rf ~/source/fonts
+		https://github.com/powerline/fonts.git ~/src/powerline-fonts
+	@cd ~/src/powerline-fonts && ./install.sh
+	@rm -rf ~/src/powerline-fonts
 
-	@echo $(APP_LOG_FMT) "installing oh-my-zsh"
+	@echo $(FORMAT) "installing oh-my-zsh"
 	@curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | bash
 	@chsh -s /bin/zsh "${USER}"
 
-	@echo $(APP_LOG_FMT) "installing bullet-train theme"
+	@echo $(FORMAT) "installing bullet-train theme"
 	@curl -fsSL -o ~/.oh-my-zsh/themes/bullet-train.zsh-theme \
 		https://raw.githubusercontent.com/caiogondim/bullet-train.zsh/master/bullet-train.zsh-theme
 
 #
-# make: pkgs target
-#
-OS_FLAVOR := $(shell uname -s | awk '{print tolower($$0)}')
-PKG_DEPS  := $(shell echo 'autoconf curl-devel gcc gcc-c++ make ncurses-devel perl-ExtUtils-MakeMaker rpm-build tree wget zlib-devel zsh')
-
---pkgs:
-ifeq ($(OS_FLAVOR), linux)
-	@echo $(APP_LOG_FMT) "installing base system packages"
-	@for pkg in $(PKG_DEPS); \
-	do \
-		yum install -y -q $$pkg; \
-	done
-endif
-
-#
 # make: git target
 #
-GIT_VERSION := 2.17.0
+GIT_VERSION := 2.18.0
 GIT_HOME    := /usr/local/src
 GIT_SOURCE  := https://github.com/git/git/archive/v$(GIT_VERSION).tar.gz
 
---git:
-	@echo $(APP_LOG_FMT) "cleaning git install directory"
-	@sudo rm -rf $(GIT_HOME)/git-*
-
-	@echo $(APP_LOG_FMT) "installing git v$(GIT_VERSION)"
-	@curl -sSL $(GIT_SOURCE) | sudo tar -C $(GIT_HOME) -zx
+git:
+	@echo $(FORMAT) "installing git"
+	@rm -rf $(GIT_HOME)/git-*
+	@curl -sSL $(GIT_SOURCE) | tar -C $(GIT_HOME) -zx
 	@cd $(GIT_HOME)/git-$(GIT_VERSION) \
-		&& sudo make configure \
-		&& sudo ./configure \
-		&& sudo make \
-		&& sudo make install
+		&& make prefix=/usr/local all \
+		&& make prefix=/usr/local install
 
 #
-# make: vim
+# make: vim target
 #
-VIM_VERSION := 8.0.1848
+VIM_VERSION := 8.1.0354
 VIM_HOME    := /usr/local/src
 VIM_SOURCE  := https://github.com/vim/vim/archive/v$(VIM_VERSION).tar.gz
 
---vim:
-	@echo $(APP_LOG_FMT) "cleaning vim install directory"
-	@sudo rm -rf $(VIM_HOME)/vim-*
-
-	@echo $(APP_LOG_FMT) "installing vim v$(VIM_VERSION)"
-	@curl -sSL $(VIM_SOURCE) | sudo tar -C $(VIM_HOME) -zx
+vim:
+	@echo $(FORMAT) "installing vim v$(VIM_VERSION)"
+	@rm -rf $(VIM_HOME)/vim-*
+	@curl -sSL $(VIM_SOURCE) | tar -C $(VIM_HOME) -zx
 	@cd $(VIM_HOME)/vim-$(VIM_VERSION) \
-		&& sudo ./configure \
-		&& sudo make install
+		&& ./configure \
+		&& make install
 
 #
 # make: go target
 #
-GO_VERSION := 1.10.2
+GO_VERSION := 1.11
 GO_HOME    := /usr/local
-GO_SOURCE  := https://dl.google.com/go/go$(GO_VERSION).$(OS_FLAVOR)-amd64.tar.gz
+GO_FLAVOR  := $(shell uname -s | awk '{print tolower($$0)}')
+GO_SOURCE  := https://dl.google.com/go/go$(GO_VERSION).$(GO_FLAVOR)-amd64.tar.gz
 
---go:
-	@echo $(APP_LOG_FMT) "cleaning go install directory"
-	@sudo rm -rf $(GO_HOME)/go
-
-	@echo $(APP_LOG_FMT) "installing go v$(GO_VERSION)"
-	@curl -sSL $(GO_SOURCE) | sudo tar -v -C $(GO_HOME) -zx
-
+go:
+	@echo $(FORMAT) "installing go $(GO_VERSION)"
+	@rm -rf $(GO_HOME)/go
+	@curl -sSL $(GO_SOURCE) | tar -C $(GO_HOME) -zx

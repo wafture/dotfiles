@@ -65,6 +65,7 @@ bootstrap-darwin:
 		zlib \
 		zsh
 	@brew install kubernetes-cli || brew upgrade kubernetes-cli || true;
+	@brew reinstall gettext && brew unlink gettext && brew link gettext --force
 
 #
 # make: bootstrap-debian target
@@ -179,7 +180,7 @@ GIT_SOURCE  := https://github.com/git/git/archive/v$(GIT_VERSION).tar.gz
 
 git:
 	@echo $(FORMAT) "installing $@"
-	@sudo rm -rf $(GIT_HOME)/$@-*
+	@sudo rm -rf $(GIT_HOME)/$@-* && sudo mkdir -p /usr/local/src
 	@curl -sSL $(GIT_SOURCE) | sudo tar -C $(GIT_HOME) -zx
 	@cd $(GIT_HOME)/$@-$(GIT_VERSION) \
 		&& sudo make prefix=/usr/local all \
@@ -195,7 +196,7 @@ HUB_SOURCE  := https://github.com/github/hub/releases/download/v$(HUB_VERSION)/h
 
 hub:
 	@echo $(FORMAT) "installing $@"
-	@sudo rm -rf $(HUB_HOME)/$@-*-$(HUB_VERSION)
+	@sudo rm -rf $(HUB_HOME)/$@-*-$(HUB_VERSION) && sudo mkdir -p /usr/local/src
 	@curl -sSL $(HUB_SOURCE) | sudo tar -C $(HUB_HOME) -zx
 	@cd $(HUB_HOME)/$@-*-$(HUB_VERSION) \
 		&& sudo ./install
@@ -209,7 +210,7 @@ VIM_SOURCE  := https://github.com/vim/vim/archive/v$(VIM_VERSION).tar.gz
 
 vim:
 	@echo $(FORMAT) "installing $@ v$(VIM_VERSION)"
-	@sudo rm -rf $(VIM_HOME)/$@-*
+	@sudo rm -rf $(VIM_HOME)/$@-* && sudo mkdir -p /usr/local/src
 	@curl -sSL $(VIM_SOURCE) | sudo tar -C $(VIM_HOME) -zx
 	@cd $(VIM_HOME)/$@-$(VIM_VERSION) \
 		&& sudo ./configure \

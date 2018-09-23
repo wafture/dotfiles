@@ -1,29 +1,51 @@
 #
 # git: core configs
 #
+[alias]
+
+  # view pretty, abbreviated commit history, with sha
+  lg = log --pretty=oneline -n 20 --graph --abbrev-commit
+
+  # view shortened status
+  stat = status -s
+
+  # switch to new branch, create if necessary
+  go = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout \"$1\"; }; f"
+
+  # commit everything
+  ca = !git add -A && git commit -av
+
 [core]
-editor = vim
-pager  = less -FRX
+
+  # change default editor
+  editor = vim
+
+  # use pretty pager
+  pager  = less -FRX
 
 [diff]
-renames = copies
+
+  # detect copies as well as renames
+  renames = copies
+
+[commit]
+  gpgsign = true
 
 [push]
-default = matching
+  default = matching
 
-[http]
-cookiefile = ~/.gitcookies
+[help]
+
+  # autocorrect mistakes
+  autocorrect = 1
 
 #
 # git: user settings
 #
 [user]
-name = Nicholas Anderson
-email = nicholas.anderson@nike.com
+  name = Nicholas Anderson
+  email = nicholas.anderson@nike.com
+	signingkey = 2B113522180FAE0B
 
 [github]
 user  = iamnande
-
-[credential]
-helper = cache --timeout 3600
-helper = store --file ~/.gitcreds

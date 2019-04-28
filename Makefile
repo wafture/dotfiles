@@ -229,7 +229,7 @@ vimfiles: ## fetch/update vimfiles
 #
 # make: go target
 #
-GO_VERSION := 1.11
+GO_VERSION := 1.12.4
 GO_HOME    := /usr/local
 GO_FLAVOR  := $(shell uname -s | awk '{print tolower($$0)}')
 GO_SOURCE  := https://dl.google.com/go/go$(GO_VERSION).$(GO_FLAVOR)-amd64.tar.gz

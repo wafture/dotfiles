@@ -70,5 +70,5 @@ gogo(){
 		return 1
 	fi
 
-	cd "${path[-1]} " || return 1
+	cd "${path[-1]}" || return 1
 }

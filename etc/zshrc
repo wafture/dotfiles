@@ -36,6 +36,7 @@ alias lsd="ls -lphG | grep '^d'"
 # zsh: exports
 #
 export GPG_TTY=$(tty)
+export GO111MODULE=on
 export LANG="en_US.UTF-8";
 export GOROOT=/usr/local/go
 export GOPATH="${HOME}/golang"

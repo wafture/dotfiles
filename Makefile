@@ -174,7 +174,7 @@ zsh:
 #
 # make: git target
 #
-GIT_VERSION := 2.18.0
+GIT_VERSION := 2.21.0
 GIT_HOME    := /usr/local/src
 GIT_SOURCE  := https://github.com/git/git/archive/v$(GIT_VERSION).tar.gz
 
@@ -189,7 +189,7 @@ git:
 #
 # make: hub target
 #
-HUB_VERSION := 2.5.1
+HUB_VERSION := 2.11.2
 HUB_HOME    := /usr/local/src
 HUB_FLAVOR  := $(shell uname -s | awk '{print tolower($$0)}')
 HUB_SOURCE  := https://github.com/github/hub/releases/download/v$(HUB_VERSION)/hub-$(HUB_FLAVOR)-amd64-$(HUB_VERSION).tgz

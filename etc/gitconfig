@@ -31,6 +31,9 @@
 [commit]
   gpgsign = true
 
+[gpg]
+  program = /usr/local/bin/gpg
+
 [push]
   default = matching
 
@@ -45,7 +48,7 @@
 [user]
   name = Nicholas Anderson
   email = nicholas.anderson@nike.com
-	signingkey = F5CD12C8BC20F53A
+  signingkey = 1D9095E3DE690B99
 
 [github]
-user  = iamnande
+  user  = iamnande

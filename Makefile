@@ -4,19 +4,11 @@
 # make: app info
 #
 NAME    := dotfiles
-FLAVOR  := centos
 UNAME   := $(shell uname -a)
 CONFIGS := $(shell find $(CURDIR)/etc -type f)
 FORMAT  := $(shell /bin/date "+%Y-%m-%d %H:%M:%S %z [$(NAME)]")
 
-ifneq (,$(findstring Ubuntu, $(UNAME)))
-	FLAVOR := debian
-endif
-ifneq (,$(findstring Darwin, $(UNAME)))
-	FLAVOR := darwin
-endif
-
-default: clean bootstrap-$(FLAVOR) zsh git vim vimfiles go install
+default: clean bootstrap zsh git vim vimfiles go install
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-12s %s\n\033[0m", $$1, $$2}'
@@ -43,120 +35,32 @@ install: ## installs dotfiles & scripts on system
 	done
 
 #
-# make: bootstrap-darwin target
+# make: bootstrap target
 #
-bootstrap-darwin:
+bootstrap: ## install machine software
 	@echo $(FORMAT) "installing brew"
 	@/usr/bin/ruby -e "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 	@echo $(FORMAT) "installing brew formulae"
-	@brew install \
+	@brew reinstall \
 		autoconf \
+		bash \
 		gcc \
 		gettext \
-		hub \
-		kops \
+		jq \
 		make \
-		node \
 		openssl \
 		ossp-uuid \
 		tree \
 		wget \
 		zlib \
 		zsh
-	@brew install kubernetes-cli || brew upgrade kubernetes-cli || true;
 	@brew reinstall gettext && brew unlink gettext && brew link gettext --force
-
-#
-# make: bootstrap-debian target
-#
-bootstrap-debian:
-	@echo $(FORMAT) "updating system packages"
-	@apt update -q || true
-	@apt upgrade -q -y || true
-
-	@echo $(FORMAT) "installing $(FLAVOR) packages"
-	@apt install -q -y \
-		adduser \
-		autoconf \
-		automake \
-		build-essential \
-		ca-certificates \
-		coreutils \
-		curl \
-		dnsutils \
-		file \
-		findutils \
-		gcc \
-		g++ \
-		gettext \
-		git \
-		grep \
-		gzip \
-		hostname \
-		jq \
-		less \
-		libcurl4-gnutls-dev \
-		libexpat1-dev \
-		libncurses-dev \
-		libssl-dev \
-		libz-dev \
-		locales \
-		lsof \
-		make \
-		mount \
-		net-tools \
-		ssh \
-		strace \
-		sudo \
-		zip \
-		zlibc \
-		zsh \
-		--no-install-recommends
-
-	@echo $(FORMAT) "cleaning up after apt"
-	@apt autoremove
-	@apt autoclean
-	@apt clean
-
-#
-# make: bootstrap-centos target
-#
-bootstrap-centos:
-	@echo $(FORMAT) "upgrading system"
-	@yum clean all
-	@yum install -y -q epel-release
-	@yum update -y -q
-
-	@echo $(FORMAT) "installing $(FLAVOR) packages"
-	@yum install -y -q \
-		autoconf \
-		ca-certificates \
-		curl \
-		curl-devel \
-		expat-devel \
-		gcc \
-		gcc-c++ \
-		gettext \
-		grep \
-		gzip \
-		jq \
-		less \
-		make \
-		net-tools \
-		ncurses-devel \
-		openssl-devel \
-		perl-ExtUtils-MakeMaker \
-		rpm-build \
-		tree \
-		wget \
-		zlib-devel \
-		zsh
 
 #
 # make: zsh target
 #
-zsh:
+zsh: ## install zsh
 	@echo $(FORMAT) "installing powerline fonts"
 	@git clone --quiet --depth=1 \
 		https://github.com/powerline/fonts.git ~/src/powerline-fonts
@@ -164,6 +68,7 @@ zsh:
 	@rm -rf ~/src/powerline-fonts
 
 	@echo $(FORMAT) "installing oh-my-zsh"
+	@rm -rf ~/.oh-my-zsh
 	@curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | bash
 	@chsh -s /bin/zsh "${USER}"
 
@@ -174,11 +79,11 @@ zsh:
 #
 # make: git target
 #
-GIT_VERSION := 2.21.0
+GIT_VERSION := 2.22.0
 GIT_HOME    := /usr/local/src
 GIT_SOURCE  := https://github.com/git/git/archive/v$(GIT_VERSION).tar.gz
 
-git:
+git: ## install git from source
 	@echo $(FORMAT) "installing $@"
 	@sudo rm -rf $(GIT_HOME)/$@-* && sudo mkdir -p /usr/local/src
 	@curl -sSL $(GIT_SOURCE) | sudo tar -C $(GIT_HOME) -zx
@@ -189,7 +94,7 @@ git:
 #
 # make: hub target
 #
-HUB_VERSION := 2.11.2
+HUB_VERSION := 2.12.2
 HUB_HOME    := /usr/local/src
 HUB_FLAVOR  := $(shell uname -s | awk '{print tolower($$0)}')
 HUB_SOURCE  := https://github.com/github/hub/releases/download/v$(HUB_VERSION)/hub-$(HUB_FLAVOR)-amd64-$(HUB_VERSION).tgz
@@ -204,7 +109,7 @@ hub:
 #
 # make: vim target
 #
-VIM_VERSION := 8.1.0354
+VIM_VERSION := 8.1.1666
 VIM_HOME    := /usr/local/src
 VIM_SOURCE  := https://github.com/vim/vim/archive/v$(VIM_VERSION).tar.gz
 
@@ -229,12 +134,12 @@ vimfiles: ## fetch/update vimfiles
 #
 # make: go target
 #
-GO_VERSION := 1.12.4
+GO_VERSION := 1.12.7
 GO_HOME    := /usr/local
 GO_FLAVOR  := $(shell uname -s | awk '{print tolower($$0)}')
 GO_SOURCE  := https://dl.google.com/go/go$(GO_VERSION).$(GO_FLAVOR)-amd64.tar.gz
 
-go:
+go: ## install golang
 	@echo $(FORMAT) "installing $@ $(GO_VERSION)"
 	@sudo rm -rf $(GO_HOME)/$@
 	@curl -sSL $(GO_SOURCE) | sudo tar -C $(GO_HOME) -zx

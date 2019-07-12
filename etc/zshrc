@@ -38,8 +38,8 @@ alias lsd="ls -lphG | grep '^d'"
 export GPG_TTY=$(tty)
 export GO111MODULE=on
 export LANG="en_US.UTF-8";
+export GOPATH="${HOME}/go"
 export GOROOT=/usr/local/go
-export GOPATH="${HOME}/golang"
 export EDITOR=/usr/local/bin/vim;
 export PATH="${GOPATH}/bin:${GOROOT}/bin:/usr/local/bin:${PATH}"
 
@@ -52,23 +52,4 @@ mkd () {
 
 tre () {
   tree -aC -I '.git' --dirsfirst "$@" | less -FRNX
-}
-
-vssh () {
-  cd ~/src/iamnande/vagrant && vagrant ssh -c 'sudo su -' "$@"
-}
-
-gogo(){
-	local pkg=$1
-
-	# search for the project dir in the GOPATH
-  local path=( `find "${GOPATH}/src" -type d -iname "${pkg}"` )
-
-	if [[ "${path}" == "" ]]; then
-		echo "Could not find a directory named ${pkg} in ${GOPATH}"
-		echo "Maybe you need to 'go get' it ;)"
-		return 1
-	fi
-
-	cd "${path[-1]}" || return 1
 }

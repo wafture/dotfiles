@@ -42,6 +42,7 @@ export GOPATH="${HOME}/go"
 export GOROOT=/usr/local/go
 export EDITOR=/usr/local/bin/vim;
 export PATH="${GOPATH}/bin:${GOROOT}/bin:/usr/local/bin:${PATH}"
+export GOPROXY="direct,https://proxy.golang.org,https://gomod.platforms.nike.com"
 
 #
 # zsh: functions

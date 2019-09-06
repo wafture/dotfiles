@@ -1,15 +1,12 @@
 # dotfiles
-> dotfiles for @iamnande
+> my dotfiles
 
-## prerequisites
+## configuring
 
-### debian
-`Make` is not on the base Ubuntu 16 image out of the Vagrant Cloud.
-
-### centos
-`git` is not on the sytem by default on the base CentOS 7 image out of the Vagrant Cloud.
-
-## install
+Wondering how to to override the git config?
 ```sh
-> make
+$ export GIT_EMAIL=<email>
+$ export GIT_USERID=<userid>
+$ export GIT_USERNAME=<name>
+$ make clean install
 ```

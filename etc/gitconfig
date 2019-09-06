@@ -2,7 +2,6 @@
 # git: core configs
 #
 [alias]
-
   # view pretty, abbreviated commit history, with sha
   lg = log --pretty=oneline -n 20 --graph --abbrev-commit
 
@@ -16,15 +15,13 @@
   ca = !git add -A && git commit -av
 
 [core]
-
   # change default editor
   editor = vim
 
   # use pretty pager
-  pager  = less -FRX
+  pager = less -FRX
 
 [diff]
-
   # detect copies as well as renames
   renames = copies
 
@@ -38,17 +35,14 @@
   default = matching
 
 [help]
-
-  # autocorrect mistakes
   autocorrect = 1
 
 #
 # git: user settings
 #
 [user]
-  name = Nicholas Anderson
   email = nicholas.anderson@nike.com
-  signingkey = 4EB3B0E6185CEEE0
+  name = Nicholas Anderson
 
 [github]
-  user  = iamnande
+  user = iamnande

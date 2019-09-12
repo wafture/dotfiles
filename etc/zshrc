@@ -38,11 +38,10 @@ alias lsd="ls -lphG | grep '^d'"
 export GPG_TTY=$(tty)
 export GO111MODULE=on
 export LANG="en_US.UTF-8";
-export GOPATH="${HOME}/go"
 export GOROOT=/usr/local/go
+export GOPATH="${HOME}/src/go"
 export EDITOR=/usr/local/bin/vim;
 export PATH="${GOPATH}/bin:${GOROOT}/bin:/usr/local/bin:${PATH}"
-export GOPROXY="direct,https://proxy.golang.org,https://gomod.platforms.nike.com"
 
 #
 # zsh: functions
